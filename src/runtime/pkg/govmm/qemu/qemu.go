@@ -418,8 +418,12 @@ func (object Object) QemuParams(config *Config) []string {
 		objectParams = append(objectParams, fmt.Sprintf("reduced-phys-bits=%d", object.ReducedPhysBits))
 		objectParams = append(objectParams, fmt.Sprintf("policy=0x%x", object.SnpPolicy))
 		// Add OVMF firmware as pflash drive
-		driveParams = append(driveParams, "if=pflash,format=raw,readonly=on")
-		driveParams = append(driveParams, fmt.Sprintf("file=%s", object.File))
+		driveParams = append(driveParams, "if=pflash,format=raw,unit=0")
+		// driveParams = append(driveParams, fmt.Sprintf("file=%s", object.File))
+		driveParams = append(driveParams, fmt.Sprintf("file=%s", "/home/mike/OVMF_VARS.fd"))
+
+		qemuParams = append(qemuParams, "-bios")
+		qemuParams = append(qemuParams, "/home/mike/src/AMDSEV/usr/local/share/qemu/OVMF_CODE.fd")
 	case SecExecGuest:
 		objectParams = append(objectParams, string(object.Type))
 		objectParams = append(objectParams, fmt.Sprintf("id=%s", object.ID))
