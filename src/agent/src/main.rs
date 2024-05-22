@@ -97,8 +97,6 @@ const AA_UNIX_SOCKET_DIR: &str = "/run/confidential-containers/attestation-agent
 const UNIX_SOCKET_PREFIX: &str = "unix://";
 const AA_KEYPROVIDER_URI: &str =
     concatcp!(UNIX_SOCKET_PREFIX, AA_UNIX_SOCKET_DIR, "keyprovider.sock");
-const AA_GETRESOURCE_URI: &str =
-    concatcp!(UNIX_SOCKET_PREFIX, AA_UNIX_SOCKET_DIR, "getresource.sock");
 const AA_ATTESTATION_SOCKET: &str = concatcp!(AA_UNIX_SOCKET_DIR, "attestation-agent.sock");
 const AA_ATTESTATION_URI: &str = concatcp!(UNIX_SOCKET_PREFIX, AA_ATTESTATION_SOCKET);
 
@@ -437,12 +435,10 @@ fn init_attestation_agent(logger: &Logger, _config: &AgentConfig) -> Result<()> 
         logger,
         AA_PATH,
         &vec![
-            "--keyprovider_sock",
-            AA_KEYPROVIDER_URI,
-            "--getresource_sock",
-            AA_GETRESOURCE_URI,
             "--attestation_sock",
             AA_ATTESTATION_URI,
+            "--config-file",
+            "/etc/attestation-agent.toml"
         ],
         AA_ATTESTATION_SOCKET,
         DEFAULT_LAUNCH_PROCESS_TIMEOUT,
@@ -454,7 +450,10 @@ fn init_attestation_agent(logger: &Logger, _config: &AgentConfig) -> Result<()> 
         if let Err(e) = launch_process(
             logger,
             CDH_PATH,
-            &vec![],
+            &vec![
+                "-c",
+                "/etc/confidential-data-hub.toml"
+            ],
             CDH_SOCKET,
             DEFAULT_LAUNCH_PROCESS_TIMEOUT,
         ) {
@@ -463,7 +462,10 @@ fn init_attestation_agent(logger: &Logger, _config: &AgentConfig) -> Result<()> 
             if let Err(e) = launch_process(
                 logger,
                 API_SERVER_PATH,
-                &vec!["--features", &_config.rest_api],
+                &vec![
+                    "--features",
+                    &_config.rest_api,
+                ],
                 "",
                 0,
             ) {

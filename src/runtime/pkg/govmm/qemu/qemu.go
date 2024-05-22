@@ -417,6 +417,8 @@ func (object Object) QemuParams(config *Config) []string {
 		objectParams = append(objectParams, fmt.Sprintf("cbitpos=%d", object.CBitPos))
 		objectParams = append(objectParams, fmt.Sprintf("reduced-phys-bits=%d", object.ReducedPhysBits))
 		objectParams = append(objectParams, fmt.Sprintf("policy=0x%x", object.SnpPolicy))
+		objectParams = append(objectParams, "certs-path=/opt/sev/cert_chain.cert")
+
 		// Add OVMF firmware as pflash drive
 		driveParams = append(driveParams, "if=pflash,format=raw,unit=0")
 		// driveParams = append(driveParams, fmt.Sprintf("file=%s", object.File))

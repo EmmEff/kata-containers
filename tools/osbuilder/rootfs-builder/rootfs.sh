@@ -762,7 +762,7 @@ EOF
 		git fetch --depth=1 origin "${attestation_agent_version}"
 		git checkout FETCH_HEAD
 		( [ "${AA_KBC}" == "eaa_kbc" ] || [ "${AA_KBC}" == "cc_kbc_tdx" ] ) && [ "${ARCH}" == "x86_64" ] && LIBC="gnu"
-		make KBC=${AA_KBC} ttrpc=true
+		make LIBC=musl ttrpc=true ATTESTER=snp-attester
 		make install DESTDIR="${ROOTFS_DIR}/usr/local/bin/"
 		strip ${ROOTFS_DIR}/usr/local/bin/attestation-agent
 		popd
@@ -774,7 +774,7 @@ EOF
 		popd
 
 		pushd guest-components/api-server-rest
-		make
+		make LIBC=musl
 		make install DESTDIR="${ROOTFS_DIR}/usr/local/bin/"
 		strip ${ROOTFS_DIR}/usr/local/bin/api-server-rest
 		popd
