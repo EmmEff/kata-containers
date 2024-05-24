@@ -72,7 +72,7 @@ clap = { version = "3.0.1", features = ["derive"] }
 
 
 # Image pull/decrypt
-image-rs = { git = "https://github.com/confidential-containers/guest-components", rev = "a151bca6d5cc1a47f2cd91437134ad8ec9c754fe", default-features = false, features = [
+image-rs = { git = "https://github.com/confidential-containers/guest-components", rev = "fea1f4e244d8fe8bc7270278ef46812c95771a61", default-features = false, features = [
     "kata-cc-native-tls",
     "verity",
     "signature-simple-xrss",

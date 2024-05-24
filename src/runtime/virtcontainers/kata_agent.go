@@ -6,6 +6,7 @@
 package virtcontainers
 
 import (
+	"context"
 	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
@@ -34,8 +35,6 @@ import (
 	"github.com/kata-containers/kata-containers/src/runtime/virtcontainers/pkg/rootless"
 	"github.com/kata-containers/kata-containers/src/runtime/virtcontainers/types"
 	"github.com/kata-containers/kata-containers/src/runtime/virtcontainers/utils"
-
-	"context"
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -1194,7 +1193,6 @@ func (k *kataAgent) appendVfioDevice(dev ContainerDevice, device api.Device, c *
 			devBDF := drivers.GetBDF(dev.BDF)
 			kataDevice.Options[i] = fmt.Sprintf("0000:%s=%s", devBDF, dev.GuestPciPath)
 		}
-
 	}
 
 	return kataDevice
@@ -1265,10 +1263,13 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 		}
 	}()
 
+	k.Logger().Info("HERE")
+
 	// Share the container rootfs -- if its block based, we'll receive a non-nil storage object representing
 	// the block device for the rootfs, which us utilized for mounting in the guest. This'll be handled
 	// already for non-block based rootfs
 	if sharedRootfs, err = sandbox.fsShare.ShareRootFilesystem(ctx, c); err != nil {
+		k.Logger().Info("HERE 1")
 		return nil, err
 	}
 
@@ -1287,6 +1288,7 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 
 	ociSpec := c.GetPatchedOCISpec()
 	if ociSpec == nil {
+		k.Logger().Info("HERE 2")
 		return nil, errorMissingOCISpec
 	}
 
@@ -1297,6 +1299,7 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 	k.Logger().Info("mounting shared dir mounts")
 	shareStorages, err := c.mountSharedDirMounts(ctx, sharedDirMounts, ignoredMounts)
 	if err != nil {
+		k.Logger().Info("HERE 3")
 		return nil, err
 	}
 	ctrStorages = append(ctrStorages, shareStorages...)
@@ -1305,6 +1308,7 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 
 	epheStorages, err := k.handleEphemeralStorage(ociSpec.Mounts)
 	if err != nil {
+		k.Logger().Info("HERE 4")
 		return nil, err
 	}
 
@@ -1313,12 +1317,14 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 	k.Logger().WithField("ociSpec Hugepage Resources", ociSpec.Linux.Resources.HugepageLimits).Debug("ociSpec HugepageLimit")
 	hugepages, err := k.handleHugepages(ociSpec.Mounts, ociSpec.Linux.Resources.HugepageLimits)
 	if err != nil {
+		k.Logger().Info("HERE 5")
 		return nil, err
 	}
 	ctrStorages = append(ctrStorages, hugepages...)
 
 	localStorages, err := k.handleLocalStorage(ociSpec.Mounts, sandbox.id, c.rootfsSuffix)
 	if err != nil {
+		k.Logger().Info("HERE 6")
 		return nil, err
 	}
 
@@ -1327,11 +1333,13 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 	// We replace all OCI mount sources that match our container mount
 	// with the right source path (The guest one).
 	if err = k.replaceOCIMountSource(ociSpec, sharedDirMounts, sandbox.config.SealedSecretEnabled); err != nil {
+		k.Logger().Info("HERE 7")
 		return nil, err
 	}
 
 	// Remove all mounts that should be ignored from the spec
 	if err = k.removeIgnoredOCIMount(ociSpec, ignoredMounts); err != nil {
+		k.Logger().Info("HERE 8")
 		return nil, err
 	}
 
@@ -1342,6 +1350,7 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 	// storage objects to pass to the agent.
 	layerStorages, volumeStorages, err := k.handleBlkOCIMounts(c, ociSpec)
 	if err != nil {
+		k.Logger().Info("HERE 9")
 		return nil, err
 	}
 
@@ -1353,6 +1362,7 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 
 	grpcSpec, err := grpc.OCItoGRPC(ociSpec)
 	if err != nil {
+		k.Logger().Info("HERE 10")
 		return nil, err
 	}
 
@@ -1379,6 +1389,7 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 	// passing irrelevant information to the agent.
 	err = k.constrainGRPCSpec(grpcSpec, passSeccomp, sandbox.config.HypervisorConfig.DisableGuestSeLinux, sandbox.config.GuestSeLinuxLabel, sandbox.config.VfioMode == config.VFIOModeGuestKernel)
 	if err != nil {
+		k.Logger().Info("HERE 11")
 		return nil, err
 	}
 
@@ -1392,8 +1403,11 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 	}
 
 	if _, err = k.sendReq(ctx, req); err != nil {
+		k.Logger().Info("HERE 12")
 		return nil, err
 	}
+	k.Logger().Info("HERE 13")
+
 	return buildProcessFromExecID(req.ExecId)
 }
 
@@ -1408,7 +1422,7 @@ func buildProcessFromExecID(token string) (*Process, error) {
 // handleHugePages handles hugepages storage by
 // creating a Storage from corresponding source of the mount point
 func (k *kataAgent) handleHugepages(mounts []specs.Mount, hugepageLimits []specs.LinuxHugepageLimit) ([]*grpc.Storage, error) {
-	//Map to hold the total memory of each type of hugepages
+	// Map to hold the total memory of each type of hugepages
 	optionsMap := make(map[int64]string)
 
 	for _, hp := range hugepageLimits {
@@ -1417,7 +1431,7 @@ func (k *kataAgent) handleHugepages(mounts []specs.Mount, hugepageLimits []specs
 				"Pagesize": hp.Pagesize,
 				"Limit":    hp.Limit,
 			}).Info("hugepage request")
-			//example Pagesize 2MB, 1GB etc. The Limit are in Bytes
+			// example Pagesize 2MB, 1GB etc. The Limit are in Bytes
 			pageSize, err := units.RAMInBytes(hp.Pagesize)
 			if err != nil {
 				k.Logger().Error("Unable to convert pagesize to bytes")
@@ -1433,10 +1447,10 @@ func (k *kataAgent) handleHugepages(mounts []specs.Mount, hugepageLimits []specs
 		if mnt.Type != KataLocalDevType {
 			continue
 		}
-		//HugePages mount Type is Local
+		// HugePages mount Type is Local
 		if _, fsType, fsOptions, _ := utils.GetDevicePathAndFsTypeOptions(mnt.Source); fsType == "hugetlbfs" {
 			k.Logger().WithField("fsOptions", fsOptions).Debug("hugepage mount options")
-			//Find the pagesize from the mountpoint options
+			// Find the pagesize from the mountpoint options
 			pagesizeOpt := getPagesizeFromOpt(fsOptions)
 			if pagesizeOpt == "" {
 				return nil, fmt.Errorf("No pagesize option found in filesystem mount options")
@@ -1446,7 +1460,7 @@ func (k *kataAgent) handleHugepages(mounts []specs.Mount, hugepageLimits []specs
 				k.Logger().Error("Unable to convert pagesize from fs mount options to bytes")
 				return nil, err
 			}
-			//Create mount option string
+			// Create mount option string
 			options := fmt.Sprintf("pagesize=%s,size=%s", strconv.FormatInt(pageSize, 10), optionsMap[pageSize])
 			k.Logger().WithField("Hugepage options string", options).Debug("hugepage mount options")
 			// Set the mount source path to a path that resides inside the VM
@@ -1598,7 +1612,7 @@ func handleImageGuestPullBlockVolume(c *Container, virtualVolumeInfo *types.Kata
 		}
 		virtualVolumeInfo.Source = image_ref
 
-		//merge virtualVolumeInfo.ImagePull.Metadata and container_annotations
+		// merge virtualVolumeInfo.ImagePull.Metadata and container_annotations
 		for k, v := range container_annotations {
 			virtualVolumeInfo.ImagePull.Metadata[k] = v
 		}
@@ -1663,7 +1677,7 @@ func handleVirtualVolumeStorageObject(c *Container, blockDeviceId string, virtVo
 		filename := b64.URLEncoding.EncodeToString([]byte(vol.Source))
 		vol.MountPoint = filepath.Join(defaultKataGuestVirtualVolumedir, filename)
 
-		//convert block storage to dmverity storage if dm-verity info is available
+		// convert block storage to dmverity storage if dm-verity info is available
 		if virtVolume.DmVerity != nil {
 			vol, err = handleDmVerityBlockVolume(vol.Driver, virtVolume.Source, virtVolume.DmVerity, vol)
 			if err != nil {
@@ -1763,7 +1777,6 @@ func (k *kataAgent) createBlkStorageObject(c *Container, m Mount) (*grpc.Storage
 // given container and will update the OCI spec to utilize this mount point as the new source for the
 // container volume. The container mount structure is updated to store the guest destination mountpoint.
 func (k *kataAgent) handleBlkOCIMounts(c *Container, spec *specs.Spec) ([]*grpc.Storage, []*grpc.Storage, error) {
-
 	var volumeStorages []*grpc.Storage
 	var layerStorages []*grpc.Storage
 
@@ -1975,7 +1988,6 @@ func (k *kataAgent) statsContainer(ctx context.Context, sandbox *Sandbox, c Cont
 	}
 
 	returnStats, err := k.sendReq(ctx, req)
-
 	if err != nil {
 		return nil, err
 	}
@@ -2084,7 +2096,6 @@ func (k *kataAgent) writeProcessStdin(ctx context.Context, c *Container, Process
 		ExecId:      ProcessID,
 		Data:        data,
 	})
-
 	if err != nil {
 		return 0, err
 	}
@@ -2244,7 +2255,7 @@ func (k *kataAgent) getReqContext(ctx context.Context, reqName string) (newCtx c
 	case grpcPullImageRequest:
 		newCtx, cancel = context.WithTimeout(ctx, imageRequestTimeout)
 	default:
-		var requestTimeout = defaultRequestTimeout
+		requestTimeout := defaultRequestTimeout
 
 		if timeout, ok := ctx.Value(customRequestTimeoutKey).(time.Duration); ok {
 			requestTimeout = timeout
@@ -2259,6 +2270,7 @@ func (k *kataAgent) sendReq(spanCtx context.Context, request interface{}) (inter
 	start := time.Now()
 
 	if err := k.connect(spanCtx); err != nil {
+		k.Logger().Info("HERE 14")
 		return nil, err
 	}
 	if !k.keepConn {
@@ -2325,7 +2337,8 @@ func (k *kataAgent) readProcessStream(containerID, processID string, data []byte
 	resp, err := read(k.ctx, &grpc.ReadStreamRequest{
 		ContainerId: containerID,
 		ExecId:      processID,
-		Len:         uint32(len(data))})
+		Len:         uint32(len(data)),
+	})
 	if err == nil {
 		copy(data, resp.Data)
 		return len(resp.Data), nil

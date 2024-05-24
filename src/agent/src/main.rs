@@ -98,7 +98,7 @@ const UNIX_SOCKET_PREFIX: &str = "unix://";
 const AA_KEYPROVIDER_URI: &str =
     concatcp!(UNIX_SOCKET_PREFIX, AA_UNIX_SOCKET_DIR, "keyprovider.sock");
 const AA_ATTESTATION_SOCKET: &str = concatcp!(AA_UNIX_SOCKET_DIR, "attestation-agent.sock");
-const AA_ATTESTATION_URI: &str = concatcp!(UNIX_SOCKET_PREFIX, AA_ATTESTATION_SOCKET);
+// const AA_ATTESTATION_URI: &str = concatcp!(UNIX_SOCKET_PREFIX, AA_ATTESTATION_SOCKET);
 
 const DEFAULT_LAUNCH_PROCESS_TIMEOUT: i32 = 6;
 
@@ -435,10 +435,12 @@ fn init_attestation_agent(logger: &Logger, _config: &AgentConfig) -> Result<()> 
         logger,
         AA_PATH,
         &vec![
+/*
             "--attestation_sock",
             AA_ATTESTATION_URI,
             "--config-file",
             "/etc/attestation-agent.toml"
+*/
         ],
         AA_ATTESTATION_SOCKET,
         DEFAULT_LAUNCH_PROCESS_TIMEOUT,
