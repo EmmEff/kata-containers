@@ -419,13 +419,12 @@ func (object Object) QemuParams(config *Config) []string {
 		objectParams = append(objectParams, fmt.Sprintf("policy=0x%x", object.SnpPolicy))
 		objectParams = append(objectParams, "certs-path=/opt/sev/cert_chain.cert")
 
+		const fwCode = "/home/mike/src/AMDSEV/usr/local/share/qemu/OVMF_CODE.fd"
+
 		// Add OVMF firmware as pflash drive
 		driveParams = append(driveParams, "if=pflash,format=raw,unit=0")
-		// driveParams = append(driveParams, fmt.Sprintf("file=%s", object.File))
-		driveParams = append(driveParams, fmt.Sprintf("file=%s", "/home/mike/OVMF_VARS.fd"))
-
-		qemuParams = append(qemuParams, "-bios")
-		qemuParams = append(qemuParams, "/home/mike/src/AMDSEV/usr/local/share/qemu/OVMF_CODE.fd")
+		driveParams = append(driveParams, fmt.Sprintf("file=%s", fwCode))
+		driveParams = append(driveParams, "readonly")
 	case SecExecGuest:
 		objectParams = append(objectParams, string(object.Type))
 		objectParams = append(objectParams, fmt.Sprintf("id=%s", object.ID))
@@ -443,6 +442,7 @@ func (object Object) QemuParams(config *Config) []string {
 		qemuParams = append(qemuParams, strings.Join(deviceParams, ","))
 	}
 
+
 	if len(objectParams) > 0 {
 		qemuParams = append(qemuParams, "-object")
 		qemuParams = append(qemuParams, strings.Join(objectParams, ","))
@@ -452,6 +452,12 @@ func (object Object) QemuParams(config *Config) []string {
 		qemuParams = append(qemuParams, "-drive")
 		qemuParams = append(qemuParams, strings.Join(driveParams, ","))
 	}
+
+	const fwVars = "/home/mike/OVMF_VARS.fd"
+
+	qemuParams = append(qemuParams, "-drive")
+	qemuParams = append(qemuParams, fmt.Sprintf("if=pflash,format=raw,unit=1,file=%s", fwVars))
+
 
 	return qemuParams
 }

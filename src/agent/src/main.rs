@@ -438,9 +438,9 @@ fn init_attestation_agent(logger: &Logger, _config: &AgentConfig) -> Result<()> 
 /*
             "--attestation_sock",
             AA_ATTESTATION_URI,
+*/
             "--config-file",
             "/etc/attestation-agent.toml"
-*/
         ],
         AA_ATTESTATION_SOCKET,
         DEFAULT_LAUNCH_PROCESS_TIMEOUT,
