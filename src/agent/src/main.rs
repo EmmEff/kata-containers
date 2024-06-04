@@ -432,14 +432,7 @@ fn init_attestation_agent(logger: &Logger, _config: &AgentConfig) -> Result<()> 
     launch_process(
         logger,
         AA_PATH,
-        &vec![
-/*
-            "--attestation_sock",
-            AA_ATTESTATION_URI,
-*/
-            "--config-file",
-            "/etc/attestation-agent.toml"
-        ],
+        &vec![],
         AA_ATTESTATION_SOCKET,
         DEFAULT_LAUNCH_PROCESS_TIMEOUT,
     )
@@ -450,10 +443,7 @@ fn init_attestation_agent(logger: &Logger, _config: &AgentConfig) -> Result<()> 
         if let Err(e) = launch_process(
             logger,
             CDH_PATH,
-            &vec![
-                "-c",
-                "/etc/confidential-data-hub.toml"
-            ],
+            &vec![],
             CDH_SOCKET,
             DEFAULT_LAUNCH_PROCESS_TIMEOUT,
         ) {
