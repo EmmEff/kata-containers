@@ -424,7 +424,7 @@ func (object Object) QemuParams(config *Config) []string {
 		// Add OVMF firmware as pflash drive
 		driveParams = append(driveParams, "if=pflash,format=raw,unit=0")
 		driveParams = append(driveParams, fmt.Sprintf("file=%s", fwCode))
-		driveParams = append(driveParams, "readonly")
+		driveParams = append(driveParams, "readonly=on")
 	case SecExecGuest:
 		objectParams = append(objectParams, string(object.Type))
 		objectParams = append(objectParams, fmt.Sprintf("id=%s", object.ID))
