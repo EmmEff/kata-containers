@@ -95,10 +95,7 @@ const OCICRYPT_CONFIG_PATH: &str = "/tmp/ocicrypt_config.json";
 const AA_PATH: &str = "/usr/local/bin/attestation-agent";
 const AA_UNIX_SOCKET_DIR: &str = "/run/confidential-containers/attestation-agent/";
 const UNIX_SOCKET_PREFIX: &str = "unix://";
-const AA_KEYPROVIDER_URI: &str =
-    concatcp!(UNIX_SOCKET_PREFIX, AA_UNIX_SOCKET_DIR, "keyprovider.sock");
 const AA_ATTESTATION_SOCKET: &str = concatcp!(AA_UNIX_SOCKET_DIR, "attestation-agent.sock");
-// const AA_ATTESTATION_URI: &str = concatcp!(UNIX_SOCKET_PREFIX, AA_ATTESTATION_SOCKET);
 
 const DEFAULT_LAUNCH_PROCESS_TIMEOUT: i32 = 6;
 
@@ -107,6 +104,7 @@ cfg_if! {
         const CDH_PATH: &str = "/usr/local/bin/confidential-data-hub";
         const CDH_SOCKET: &str = "/run/confidential-containers/cdh.sock";
         const API_SERVER_PATH: &str = "/usr/local/bin/api-server-rest";
+        const CDH_URI: &str = concatcp!(UNIX_SOCKET_PREFIX, CDH_SOCKET);
     }
 }
 
@@ -421,7 +419,7 @@ fn init_attestation_agent(logger: &Logger, _config: &AgentConfig) -> Result<()> 
     let ocicrypt_config = serde_json::json!({
         "key-providers": {
             "attestation-agent":{
-                "ttrpc":AA_KEYPROVIDER_URI
+                "ttrpc":CDH_URI
             }
         }
     });
