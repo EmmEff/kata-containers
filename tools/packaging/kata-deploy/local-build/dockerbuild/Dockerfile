@@ -45,10 +45,10 @@ RUN sh -c "echo '${IMG_USER} ALL=NOPASSWD: ALL' >> /etc/sudoers"
 
 RUN if [ "${ARCH}" != "$(uname -m)" ] && [ "${ARCH}" == "s390x" ]; then sed -i 's/^deb/deb [arch=amd64]/g' /etc/apt/sources.list && \
     dpkg --add-architecture "s390x" && \
-    echo "deb [arch=s390x] http://ports.ubuntu.com/ focal main multiverse universe" >> /etc/apt/sources.list && \
-    echo "deb [arch=s390x] http://ports.ubuntu.com/ focal-security main multiverse universe" >> /etc/apt/sources.list && \
-    echo "deb [arch=s390x] http://ports.ubuntu.com/ focal-backports main multiverse universe" >> /etc/apt/sources.list && \
-    echo "deb [arch=s390x] http://ports.ubuntu.com/ focal-updates main multiverse universe" >> /etc/apt/sources.list; fi
+    echo "deb [arch=s390x] http://ports.ubuntu.com/ jammy main multiverse universe" >> /etc/apt/sources.list && \
+    echo "deb [arch=s390x] http://ports.ubuntu.com/ jammy-security main multiverse universe" >> /etc/apt/sources.list && \
+    echo "deb [arch=s390x] http://ports.ubuntu.com/ jammy-backports main multiverse universe" >> /etc/apt/sources.list && \
+    echo "deb [arch=s390x] http://ports.ubuntu.com/ jammy-updates main multiverse universe" >> /etc/apt/sources.list; fi
 
 #FIXME: gcc is required as agent is build out of a container build.
 RUN apt-get update && \

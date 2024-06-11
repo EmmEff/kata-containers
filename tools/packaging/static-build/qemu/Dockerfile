@@ -17,13 +17,13 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN if [ "${ARCH}" != "$(uname -m)" ]; then sed -i 's/^deb/deb [arch=amd64]/g' /etc/apt/sources.list && \
     dpkg --add-architecture "${DPKG_ARCH#:}" && \
-    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ focal main restricted" >> /etc/apt/sources.list && \
-    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ focal-updates main restricted" >> /etc/apt/sources.list && \
-    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ focal universe" >> /etc/apt/sources.list && \
-    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ focal-updates universe" >> /etc/apt/sources.list && \
-    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ focal multiverse" >> /etc/apt/sources.list && \
-    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ focal-updates multiverse" >> /etc/apt/sources.list && \
-    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ focal-backports main restricted universe multiverse" >> /etc/apt/sources.list; fi
+    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ jammy main restricted" >> /etc/apt/sources.list && \
+    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ jammy-updates main restricted" >> /etc/apt/sources.list && \
+    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ jammy universe" >> /etc/apt/sources.list && \
+    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ jammy-updates universe" >> /etc/apt/sources.list && \
+    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ jammy multiverse" >> /etc/apt/sources.list && \
+    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ jammy-updates multiverse" >> /etc/apt/sources.list && \
+    echo "deb [arch=${DPKG_ARCH#:}] http://ports.ubuntu.com/ jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list; fi
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get --no-install-recommends install -y \

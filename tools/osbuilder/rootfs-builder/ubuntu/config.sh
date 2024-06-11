@@ -4,7 +4,7 @@
 
 source /etc/os-release
 OS_NAME=ubuntu
-# This should be Ubuntu's code name, e.g. "focal" (Focal Fossa) for 20.04
+# This should be Ubuntu's code name, e.g. "jammy" (Jammy Jellyfish) for 22.04
 OS_VERSION=${OS_VERSION:-${UBUNTU_CODENAME}}
 PACKAGES="chrony iptables dbus"
 [ "$AGENT_INIT" = no ] && PACKAGES+=" init"
