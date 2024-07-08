@@ -73,6 +73,7 @@ pub struct AgentEndpoints {
     pub all_allowed: bool,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct AgentConfig {
     pub debug_console: bool,
