@@ -2693,6 +2693,7 @@ dependencies = [
  "netlink-sys",
  "nix 0.24.3",
  "oci",
+ "oci-distribution",
  "openssl",
  "opentelemetry",
  "procfs 0.12.0",

@@ -10,6 +10,7 @@ use std::env;
 use std::fs;
 use std::io::Write;
 use std::path::Path;
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicU16, Ordering};
 use std::sync::Arc;
 
@@ -17,6 +18,8 @@ use anyhow::{anyhow, Context, Result};
 use async_trait::async_trait;
 use base64::{engine::general_purpose, Engine as _};
 use image_rs::image::ImageClient;
+use image_rs::pull::PullClient;
+use oci_distribution::secrets::RegistryAuth;
 use protocols::image;
 use rand::{thread_rng, RngCore};
 use serde::{Deserialize, Serialize};
@@ -247,16 +250,21 @@ impl ImageService {
 
         let client = reqwest::blocking::Client::new();
 
-        let value = match image_metadata.get("containerd.io/snapshot/cri.layer-digest") {
-            Some(value) => value.to_string(),
-            None => String::from("<undefined>"),
-        };
+        let reference: oci_distribution::Reference = image.parse().unwrap();
+
+        let auth = RegistryAuth::Anonymous;
+
+        let path = PathBuf::new();
+
+        let mut reg_client = PullClient::new(reference.clone(), &path, &auth, 1).unwrap();
+
+        let (_, digest, _) = reg_client.pull_manifest().await.unwrap();
 
         let b64_value = base64_encode_report(&get_report().unwrap()).unwrap();
 
         let req_data = RequestData {
             image: String::from(image),
-            digest: String::from(value),
+            digest: String::from(digest),
             hw_attest: b64_value,
         };
 
